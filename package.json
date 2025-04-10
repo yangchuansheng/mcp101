@@ -1,0 +1,51 @@
+{
+  "name": "fumadocs-app",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start",
+    "postinstall": "fumadocs-mdx"
+  },
+  "dependencies": {
+    "@mdx-js/loader": "^3.1.0",
+    "@mdx-js/react": "^3.1.0",
+    "@next/mdx": "^15.2.0",
+    "@radix-ui/react-icons": "^1.3.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "canvas": "^3.1.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.11.1",
+    "fumadocs-core": "^14.7.7",
+    "fumadocs-docgen": "^1.3.6",
+    "fumadocs-mdx": "^11.1.0",
+    "fumadocs-ui": "^14.7.7",
+    "jest-worker": "^29.7.0",
+    "lucide-react": "^0.451.0",
+    "mermaid": "^11.6.0",
+    "next": "^14.2.25",
+    "next-themes": "^0.4.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-player": "^2.16.0",
+    "react-responsive": "^10.0.0",
+    "sharp": "^0.33.5",
+    "tailwind-merge": "^2.5.2",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/mdx": "^2.0.13",
+    "@types/node": "22.5.4",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.45",
+    "prettier": "^2.8.8",
+    "prettier-plugin-tailwindcss": "^0.2.8",
+    "tailwindcss": "^3.4.10",
+    "typescript": "^5.5.4"
+  }
+}

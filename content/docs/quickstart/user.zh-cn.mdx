@@ -1,0 +1,237 @@
+---
+title: "Claude桌面版用户"
+description: "Claude桌面版预构建服务器使用教程"
+---
+
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Grid3x3, Code } from 'lucide-react';
+
+本教程将指导您如何增强[Claude桌面版](https://claude.ai/download)的功能，让它能够读取计算机文件系统、创建新文件、移动文件，甚至搜索文件内容。
+
+  <img src="/images/quickstart-filesystem.png" />
+
+不用担心——在执行这些操作前，Claude会先请求您的授权！
+
+## 1. 下载Claude桌面版
+
+首先访问官网下载[Claude桌面版](https://claude.ai/download)，选择适合您系统的版本（macOS或Windows）。（目前Claude桌面版暂不支持Linux系统）
+
+按照提示完成安装过程。
+
+如果您已安装Claude桌面版，请确保使用的是最新版本。点击电脑上的Claude菜单，选择"检查更新..."选项。
+
+<Accordions>
+<Accordion title="为什么使用Claude桌面版而不是Claude.ai网页版？">
+  因为服务器需要在本地运行，目前MCP只支持桌面端。远程主机功能正在开发中。
+</Accordion>
+</Accordions>
+
+## 2. 添加文件系统MCP服务器
+
+要添加文件系统功能，我们需要在Claude桌面版中安装预构建的[文件系统MCP服务器](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)。这是Anthropic官方和社区开发的众多[服务器](https://github.com/modelcontextprotocol/servers/tree/main)之一。
+
+首先，点击电脑上的Claude菜单，选择"设置..."。注意，这不是应用窗口内的Claude账户设置。
+
+Mac上的界面如下图所示：
+
+  <img src="/images/quickstart-menu.png" width="400" />
+
+在设置窗口左侧边栏点击"开发者"，然后点击"编辑配置"：
+  <img src="/images/quickstart-developer.png" />
+
+系统会创建配置文件（如果之前没有的话），并在文件系统中显示。配置文件位置：
+- macOS系统：`~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows系统：`%APPDATA%\Claude\claude_desktop_config.json`
+
+用任意文本编辑器打开此配置文件，将内容替换为：
+<Tabs items={['MacOS/Linux', 'Windows']}>
+<Tab value="MacOS/Linux">
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/用户名/Desktop",
+        "/Users/用户名/Downloads"
+      ]
+    }
+  }
+}
+```
+</Tab>
+<Tab value="Windows">
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\用户名\\Desktop",
+        "C:\\Users\\用户名\\Downloads"
+      ]
+    }
+  }
+}
+```
+</Tab>
+</Tabs>
+
+请将配置中的`用户名`替换为您计算机的实际用户名。路径应指向您希望Claude能够访问和修改的有效目录。默认设置允许访问桌面和下载文件夹，您也可以添加更多路径。
+
+为确保正常运行，您的电脑上需要安装[Node.js](https://nodejs.org)。检查Node是否已安装的方法：
+- macOS用户：打开应用程序文件夹中的终端
+- Windows用户：按下Windows + R组合键，输入"cmd"，然后按回车
+
+在命令行窗口中，输入以下命令检查Node是否已安装：
+```bash
+node --version
+```
+如果出现"command not found"（命令未找到）或"node is not recognized"（无法识别node）等错误提示，请前往[nodejs.org](https://nodejs.org/)下载安装Node.js。
+
+<Callout type="info">
+**配置文件工作原理**
+
+该配置文件告诉Claude桌面版在每次启动时需要启动哪些MCP服务器。在本例中，我们添加了一个名为"filesystem"的服务器，它使用Node的`npx`命令安装并运行`@modelcontextprotocol/server-filesystem`。这个服务器（详情参见[这里](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)）使您能够在Claude桌面版中访问文件系统。
+</Callout>
+
+<Callout type="warn">
+**命令权限提醒**
+
+Claude桌面版会使用您用户账户的权限运行配置文件中的命令，并访问您的本地文件。请确保只添加您了解并信任的命令源。
+</Callout>
+
+## 3. 重启Claude
+
+更新配置文件后，需要重启Claude桌面版。
+
+重启后，您应该能在输入框右下角看到一个锤子图标 <img src="/images/claude-desktop-mcp-hammer-icon.svg" style={{display: 'inline', margin: 0, height: '1.3em'}} />：
+
+  <img src="/images/quickstart-hammer.png" />
+
+点击锤子图标，您将看到文件系统MCP服务器提供的工具：
+
+  <img src="/images/quickstart-tools.png" width="400" />
+
+如果Claude桌面版未能识别您的服务器，请参考[故障排除](#故障排除)部分获取调试方法。
+
+## 4. 实际使用
+
+现在您可以与Claude对话，询问有关文件系统的问题。Claude会在需要时调用相关工具。
+
+您可以尝试这些提问：
+- 请写一首诗并保存到我的桌面
+- 我的下载文件夹中有哪些工作相关的文件？
+- 请将我桌面上的所有图片移动到一个新建的"图片"文件夹
+
+根据需要，Claude会调用相关工具，并在执行操作前请求您的确认：
+
+  <img src="/images/quickstart-approve.png" width="500" />
+
+## 故障排除
+
+<Accordions>
+<Accordion title="服务器未在Claude中显示或锤子图标缺失">
+  1. 彻底重启Claude桌面版
+  2. 检查`claude_desktop_config.json`文件语法是否正确
+  3. 确保`claude_desktop_config.json`中的文件路径有效且为绝对路径
+  4. 查看[日志](#获取claude桌面版日志)了解服务器未连接的原因
+  5. 在命令行中尝试手动运行服务器（替换`用户名`为您的实际用户名）看是否有错误：
+<Tabs>
+<Tab value="MacOS/Linux">
+```bash
+npx -y @modelcontextprotocol/server-filesystem /Users/用户名/Desktop /Users/用户名/Downloads
+```
+</Tab>
+<Tab value="Windows">
+```bash
+npx -y @modelcontextprotocol/server-filesystem C:\Users\用户名\Desktop C:\Users\用户名\Downloads
+```
+</Tab>
+</Tabs>
+</Accordion>
+<Accordion title="获取Claude桌面版日志">
+  MCP相关的Claude应用日志文件位置：
+  - macOS系统：`~/Library/Logs/Claude`
+  - Windows系统：`%APPDATA%\Claude\logs`
+
+  - `mcp.log`文件包含MCP连接和连接失败的常规日志
+  - 名为`mcp-server-服务器名称.log`的文件包含指定服务器的错误(stderr)日志
+
+  您可以运行以下命令查看最近的日志（Windows只会显示最近的日志）：
+<Tabs items={['MacOS/Linux', 'Windows']}>
+<Tab value="MacOS/Linux">
+```bash
+# 查看Claude日志中的错误
+tail -n 20 -f ~/Library/Logs/Claude/mcp*.log
+```
+</Tab>
+<Tab value="Windows">
+```bash
+type "%APPDATA%\Claude\logs\mcp*.log"
+```
+</Tab>
+</Tabs>
+</Accordion>
+<Accordion title="工具调用失败但没有错误提示">
+  如果Claude尝试使用工具但失败了：
+
+  1. 检查Claude的日志文件中是否有错误信息
+  2. 验证您的服务器是否能正常构建和运行
+  3. 尝试重启Claude桌面版
+</Accordion>
+<Accordion title="以上方法都不起作用，怎么办？">
+  请参考我们的[详细调试指南](/docs/tools/debugging)获取更多调试工具和指导。
+</Accordion>
+<Accordion title="Windows系统出现ENOENT错误和路径中的`${APPDATA}`问题">
+如果您配置的服务器无法加载，且日志中出现引用路径中`${APPDATA}`的错误，您可能需要在`claude_desktop_config.json`的`env`键中添加`%APPDATA%`的展开值：
+
+```json
+{
+  "brave-search": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+    "env": {
+      "APPDATA": "C:\\Users\\user\\AppData\\Roaming\\",
+      "BRAVE_API_KEY": "..."
+    }
+  }
+}
+```
+
+完成此更改后，重新启动Claude桌面版。
+
+<Callout type="warn">
+**NPM需要全局安装**
+
+如果您未全局安装NPM，`npx`命令可能会持续失败。检查方法：如果已全局安装NPM，您的系统上会存在`%APPDATA%\npm`目录。如果没有，请运行以下命令全局安装NPM：
+
+```bash
+npm install -g npm
+```
+</Callout>
+
+</Accordion>
+</Accordions>
+
+## 下一步
+<Cards cols={2}>
+  <Card
+    title="探索其他服务器"
+    icon={<Grid3x3 />}
+    href="/examples"
+  >
+    浏览我们的官方MCP服务器和实现示例库
+  </Card>
+  <Card
+    title="构建自己的服务器"
+    icon={<Code />}
+    href="/quickstart/server"
+  >
+    开始构建您的自定义服务器，在Claude桌面版和其他客户端中使用
+  </Card>
+</Cards>
