@@ -136,4 +136,37 @@
   text-align: center;
   max-width: 90%;
 }
- 
+
+/* Update component styles */
+.update-container {
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.update-container:last-child {
+  border-bottom: none;
+}
+
+.update-container .prose-sm ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.update-container .prose-sm a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.update-container .prose-sm a:hover {
+  text-decoration: none;
+}
+
+.text-secondary {
+  color: hsl(var(--secondary-foreground));
+  opacity: 0.8;
+}
+
+.dark .text-secondary-light {
+  color: hsl(var(--secondary));
+  opacity: 0.8;
+}
