@@ -1,0 +1,313 @@
+---
+title: "工具"
+description: "让 LLM 通过服务器执行操作"
+---
+
+工具是模型上下文协议（MCP）中的一个强大基础组件，它使服务器能够向客户端提供可执行的功能。通过工具，大语言模型可以与外部系统交互、执行计算以及在现实世界中执行各种操作。
+
+<Callout type="info">
+工具设计为**由模型控制**的功能，这意味着服务器向客户端提供工具的目的是让AI模型能够自动调用它们（在人类审核和批准的情况下）。
+</Callout>
+
+## 概述
+
+MCP中的工具允许服务器提供可执行函数，这些函数可由客户端调用并由大语言模型使用来执行操作。工具的关键特点包括：
+
+- **发现机制**：客户端可以通过`tools/list`接口列出可用工具
+- **调用方式**：工具通过`tools/call`接口调用，服务器执行请求的操作并返回结果
+- **灵活性**：工具的复杂度可以从简单的计算到复杂的API交互不等
+
+与[资源](/docs/concepts/resources)类似，工具通过唯一名称标识，并可以包含描述来指导使用。但与资源不同的是，工具代表可以修改状态或与外部系统交互的动态操作。
+
+## 工具定义结构
+
+每个工具的定义结构如下：
+
+```typescript
+{
+  name: string;          // 工具的唯一标识符
+  description?: string;  // 人类可读的描述信息
+  inputSchema: {         // 工具参数的JSON Schema定义
+    type: "object",
+    properties: { ... }  // 工具特定的参数
+  }
+}
+```
+
+## 实现工具
+
+以下是在MCP服务器中实现基本工具的示例：
+
+<Tabs items={['TypeScript', 'Python']}>
+  <Tab value="TypeScript">
+    ```typescript
+    const server = new Server({
+      name: "example-server",
+      version: "1.0.0"
+    }, {
+      capabilities: {
+        tools: {}
+      }
+    });
+
+    // 定义可用工具
+    server.setRequestHandler(ListToolsRequestSchema, async () => {
+      return {
+        tools: [{
+          name: "calculate_sum",
+          description: "将两个数字相加",
+          inputSchema: {
+            type: "object",
+            properties: {
+              a: { type: "number" },
+              b: { type: "number" }
+            },
+            required: ["a", "b"]
+          }
+        }]
+      };
+    });
+
+    // 处理工具执行
+    server.setRequestHandler(CallToolRequestSchema, async (request) => {
+      if (request.params.name === "calculate_sum") {
+        const { a, b } = request.params.arguments;
+        return {
+          content: [
+            {
+              type: "text",
+              text: String(a + b)
+            }
+          ]
+        };
+      }
+      throw new Error("未找到工具");
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    app = Server("example-server")
+
+    @app.list_tools()
+    async def list_tools() -> list[types.Tool]:
+        return [
+            types.Tool(
+                name="calculate_sum",
+                description="将两个数字相加",
+                inputSchema={
+                    "type": "object",
+                    "properties": {
+                        "a": {"type": "number"},
+                        "b": {"type": "number"}
+                    },
+                    "required": ["a", "b"]
+                }
+            )
+        ]
+
+    @app.call_tool()
+    async def call_tool(
+        name: str,
+        arguments: dict
+    ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+        if name == "calculate_sum":
+            a = arguments["a"]
+            b = arguments["b"]
+            result = a + b
+            return [types.TextContent(type="text", text=str(result))]
+        raise ValueError(f"未找到工具: {name}")
+    ```
+  </Tab>
+</Tabs>
+
+## 工具模式示例
+
+下面是服务器可以提供的几种工具类型示例：
+
+### 系统操作
+
+与本地系统交互的工具：
+
+```typescript
+{
+  name: "execute_command",
+  description: "运行Shell命令",
+  inputSchema: {
+    type: "object",
+    properties: {
+      command: { type: "string" },
+      args: { type: "array", items: { type: "string" } }
+    }
+  }
+}
+```
+
+### API集成
+
+封装外部API的工具：
+
+```typescript
+{
+  name: "github_create_issue",
+  description: "创建GitHub Issue",
+  inputSchema: {
+    type: "object",
+    properties: {
+      title: { type: "string" },
+      body: { type: "string" },
+      labels: { type: "array", items: { type: "string" } }
+    }
+  }
+}
+```
+
+### 数据处理
+
+转换或分析数据的工具：
+
+```typescript
+{
+  name: "analyze_csv",
+  description: "分析CSV文件",
+  inputSchema: {
+    type: "object",
+    properties: {
+      filepath: { type: "string" },
+      operations: {
+        type: "array",
+        items: {
+          enum: ["sum", "average", "count"]
+        }
+      }
+    }
+  }
+}
+```
+
+## 最佳实践
+
+实现工具时的建议：
+
+1. 提供清晰、描述性的名称和说明
+2. 为参数使用详细的JSON Schema定义
+3. 在工具描述中包含示例，展示模型应如何使用它们
+4. 实现适当的错误处理和验证
+5. 对长时间运行的操作使用进度报告
+6. 保持工具操作的专注性和原子性
+7. 记录预期的返回值结构
+8. 实现适当的超时机制
+9. 考虑为资源密集型操作设置速率限制
+10. 记录工具使用情况以便调试和监控
+
+## 安全注意事项
+
+在提供工具时需考虑：
+
+### 输入验证
+
+- 根据Schema验证所有参数
+- 对文件路径和系统命令进行安全处理
+- 验证URL和外部标识符
+- 检查参数大小和范围
+- 防止命令注入
+
+### 访问控制
+
+- 在需要的地方实现身份验证
+- 使用适当的授权检查
+- 审计工具使用情况
+- 限制请求速率
+- 监控滥用行为
+
+### 错误处理
+
+- 不向客户端透露内部错误
+- 记录与安全相关的错误
+- 适当处理超时
+- 发生错误后清理资源
+- 验证返回值
+
+## 工具发现与更新
+
+MCP支持动态工具发现：
+
+1. 客户端可以随时列出可用工具
+2. 服务器可以使用`notifications/tools/list_changed`通知客户端工具变更
+3. 工具可以在运行时添加或删除
+4. 工具定义可以更新（但应谨慎进行）
+
+## 错误处理
+
+工具错误应在结果对象中报告，而不是作为MCP协议级别的错误。这样大语言模型可以看到并可能处理错误。当工具遇到错误时：
+
+1. 在结果中将`isError`设置为`true`
+2. 在`content`数组中包含错误详情
+
+下面是正确处理工具错误的示例：
+
+<Tabs items={['TypeScript', 'Python']}>
+  <Tab value="TypeScript">
+    ```typescript
+    try {
+      // 工具操作
+      const result = performOperation();
+      return {
+        content: [
+          {
+            type: "text",
+            text: `操作成功: ${result}`
+          }
+        ]
+      };
+    } catch (error) {
+      return {
+        isError: true,
+        content: [
+          {
+            type: "text",
+            text: `错误: ${error.message}`
+          }
+        ]
+      };
+    }
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    try:
+        # 工具操作
+        result = perform_operation()
+        return types.CallToolResult(
+            content=[
+                types.TextContent(
+                    type="text",
+                    text=f"操作成功: {result}"
+                )
+            ]
+        )
+    except Exception as error:
+        return types.CallToolResult(
+            isError=True,
+            content=[
+                types.TextContent(
+                    type="text",
+                    text=f"错误: {str(error)}"
+                )
+            ]
+        )
+    ```
+  </Tab>
+</Tabs>
+
+这种方法让大语言模型能够识别到错误发生，并可能采取纠正措施或请求人类干预。
+
+## 测试工具
+
+MCP工具的全面测试策略应涵盖：
+
+- **功能测试**：验证工具能否正确处理有效输入并适当处理无效输入
+- **集成测试**：使用真实和模拟的依赖项测试工具与外部系统的交互
+- **安全测试**：验证身份验证、授权、输入处理和速率限制
+- **性能测试**：检查在负载下的行为、超时处理和资源清理
+- **错误处理**：确保工具通过MCP协议正确报告错误并清理资源

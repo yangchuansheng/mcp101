@@ -69,7 +69,7 @@ export default function Header({ lang }: { lang: languagesType }) {
           </div>
 
           <div className="hidden items-center gap-4 text-sm font-medium lg:flex">
-            <a href={appDomain} target="_blank">
+            <a href='/docs/core/introduction'>
               <GetStartedButton title={translations.getStarted} />
             </a>
           </div>

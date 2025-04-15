@@ -1,0 +1,348 @@
+---
+title: "核心架构"
+description: "了解 MCP 如何连接客户端、服务器和大型语言模型"
+---
+
+模型上下文协议（MCP）建立在一个灵活、可扩展的架构之上，旨在实现大型语言模型（LLM）应用程序与集成之间的无缝通信。本文档将介绍其核心架构组件和概念。
+
+## 概述
+
+MCP 遵循客户端-服务器架构，其中：
+
+- **主机** 是发起连接的大型语言模型应用程序（例如 Claude 桌面版或集成开发环境）
+- **客户端** 在主机应用程序内部，与服务器维持一对一的连接
+- **服务器** 向客户端提供上下文、工具和提示
+
+<Mermaid chart={`
+flowchart LR
+    subgraph "主机"
+        client1[MCP 客户端]
+        client2[MCP 客户端]
+    end
+    subgraph "服务器进程"
+        server1[MCP 服务器]
+    end
+    subgraph "服务器进程"
+        server2[MCP 服务器]
+    end
+
+    client1 <-->|传输层| server1
+    client2 <-->|传输层| server2
+`} />
+
+## 核心组件
+
+### 协议层
+
+协议层负责处理消息帧、请求/响应的关联以及高层通信模式。
+
+<Tabs items={['TypeScript', 'Python']}>
+  <Tab value="TypeScript">
+    ```typescript
+    class Protocol<Request, Notification, Result> {
+        // 处理传入的请求
+        setRequestHandler<T>(schema: T, handler: (request: T, extra: RequestHandlerExtra) => Promise<Result>): void
+
+        // 处理传入的通知
+        setNotificationHandler<T>(schema: T, handler: (notification: T) => Promise<void>): void
+
+        // 发送请求并等待响应
+        request<T>(request: Request, schema: T, options?: RequestOptions): Promise<T>
+
+        // 发送单向通知
+        notification(notification: Notification): Promise<void>
+    }
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    class Session(BaseSession[RequestT, NotificationT, ResultT]):
+        async def send_request(
+            self,
+            request: RequestT,
+            result_type: type[Result]
+        ) -> Result:
+            """发送请求并等待响应。如果响应包含错误，则引发 McpError。"""
+            # 请求处理实现
+
+        async def send_notification(
+            self,
+            notification: NotificationT
+        ) -> None:
+            """发送不需要响应的单向通知。"""
+            # 通知处理实现
+
+        async def _received_request(
+            self,
+            responder: RequestResponder[ReceiveRequestT, ResultT]
+        ) -> None:
+            """处理来自对方的传入请求。"""
+            # 请求处理实现
+
+        async def _received_notification(
+            self,
+            notification: ReceiveNotificationT
+        ) -> None:
+            """处理来自对方的传入通知。"""
+            # 通知处理实现
+    ```
+  </Tab>
+</Tabs>
+
+关键类包括：
+
+* `Protocol`
+* `Client`
+* `Server`
+
+### 传输层
+
+传输层负责处理客户端和服务器之间的实际通信。MCP 支持多种传输机制：
+
+1.  **标准输入输出传输**
+    -   使用标准输入/输出进行通信
+    -   适用于本地进程
+
+2.  **基于服务器发送事件的 HTTP 传输**
+    -   使用服务器发送事件（SSE）处理服务器到客户端的消息
+    -   使用 HTTP POST 处理客户端到服务器的消息
+
+所有传输方式都使用 [JSON-RPC](https://www.jsonrpc.org/) 2.0 协议来交换消息。有关模型上下文协议消息格式的详细信息，请参阅[规范](/specification/)。
+
+### 消息类型
+
+MCP 主要有以下几种消息类型：
+
+1.  **请求**：需要对方响应的消息
+    ```typescript
+    interface Request {
+      method: string;
+      params?: { ... };
+    }
+    ```
+
+2.  **结果**：对请求的成功响应
+    ```typescript
+    interface Result {
+      [key: string]: unknown;
+    }
+    ```
+
+3.  **错误**：表示请求失败
+    ```typescript
+    interface Error {
+      code: number;
+      message: string;
+      data?: unknown;
+    }
+    ```
+
+4.  **通知**：不需要响应的单向消息
+    ```typescript
+    interface Notification {
+      method: string;
+      params?: { ... };
+    }
+    ```
+
+## 连接生命周期
+
+### 1. 初始化
+
+<Mermaid chart={`
+sequenceDiagram
+    participant 客户端
+    participant 服务器
+
+    客户端->>服务器: 初始化请求
+    服务器->>客户端: 初始化响应
+    客户端->>服务器: 初始化完成通知
+
+    Note over 客户端,服务器: 连接已准备就绪
+`} />
+
+
+1.  客户端发送 `initialize` 请求，包含协议版本和能力信息
+2.  服务器响应其协议版本和能力信息
+3.  客户端发送 `initialized` 通知作为确认
+4.  开始正常的消息交换
+
+### 2. 消息交换
+
+初始化后，支持以下模式：
+
+-   **请求-响应**：客户端或服务器发送请求，另一方响应
+-   **通知**：任何一方发送单向消息
+
+### 3. 终止
+
+任何一方都可以终止连接：
+-   通过 `close()` 方法正常关闭
+-   传输层断开连接
+-   出现错误情况
+
+## 错误处理
+
+MCP 定义了以下标准错误代码：
+
+```typescript
+enum ErrorCode {
+  // 标准 JSON-RPC 错误代码
+  ParseError = -32700,      // 解析错误
+  InvalidRequest = -32600,  // 无效请求
+  MethodNotFound = -32601,  // 方法未找到
+  InvalidParams = -32602,   // 无效参数
+  InternalError = -32603    // 内部错误
+}
+```
+
+软件开发工具包（SDK）和应用程序可以定义自己的错误代码（大于 -32000）。
+
+错误通过以下方式传播：
+-   对请求的错误响应
+-   传输层的错误事件
+-   协议级别的错误处理程序
+
+## 实现示例
+
+以下是一个实现 MCP 服务器的基本示例：
+
+<Tabs items={['TypeScript', 'Python']}>
+  <Tab value="TypeScript">
+    ```typescript
+    import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+    import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+
+    const server = new Server({
+      name: "example-server",
+      version: "1.0.0"
+    }, {
+      capabilities: {
+        resources: {}
+      }
+    });
+
+    // 处理请求
+    server.setRequestHandler(ListResourcesRequestSchema, async () => {
+      return {
+        resources: [
+          {
+            uri: "example://resource",
+            name: "示例资源" // Example Resource
+          }
+        ]
+      };
+    });
+
+    // 连接传输层
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    import asyncio
+    import mcp.types as types
+    from mcp.server import Server
+    from mcp.server.stdio import stdio_server
+
+    app = Server("example-server")
+
+    @app.list_resources()
+    async def list_resources() -> list[types.Resource]:
+        return [
+            types.Resource(
+                uri="example://resource",
+                name="示例资源" # Example Resource
+            )
+        ]
+
+    async def main():
+        async with stdio_server() as streams:
+            await app.run(
+                streams[0],
+                streams[1],
+                app.create_initialization_options()
+            )
+
+    if __name__ == "__main__":
+        asyncio.run(main())
+    ```
+  </Tab>
+</Tabs>
+
+## 最佳实践
+
+### 传输方式选择
+
+1.  **本地通信**
+    -   对于本地进程，使用标准输入输出传输
+    -   在同一台机器上通信效率高
+    -   进程管理简单
+
+2.  **远程通信**
+    -   对于需要 HTTP 兼容性的场景，使用基于服务器发送事件的传输
+    -   考虑安全问题，包括身份验证和授权
+
+### 消息处理
+
+1.  **请求处理**
+    -   彻底验证输入
+    -   使用类型安全的模式（schema）
+    -   优雅地处理错误
+    -   实现超时机制
+
+2.  **进度报告**
+    -   对于长时间运行的操作，使用进度令牌（progress token）
+    -   增量报告进度
+    -   如果已知总进度，则包含总进度信息
+
+3.  **错误管理**
+    -   使用恰当的错误代码
+    -   包含有用的错误消息
+    -   在出错时清理资源
+
+## 安全注意事项
+
+1.  **传输安全**
+    -   对于远程连接，使用 TLS 加密
+    -   验证连接来源
+    -   在需要时实施身份验证
+
+2.  **消息验证**
+    -   验证所有传入消息
+    -   清理（Sanitize）输入内容
+    -   检查消息大小限制
+    -   验证 JSON-RPC 格式
+
+3.  **资源保护**
+    -   实施访问控制
+    -   验证资源路径
+    -   监控资源使用情况
+    -   限制请求速率
+
+4.  **错误处理**
+    -   不要泄露敏感信息
+    -   记录与安全相关的错误
+    -   实施恰当的清理机制
+    -   处理拒绝服务（DoS）攻击场景
+
+## 调试与监控
+
+1.  **日志记录**
+    -   记录协议事件
+    -   跟踪消息流
+    -   监控性能
+    -   记录错误
+
+2.  **诊断**
+    -   实施健康检查
+    -   监控连接状态
+    -   跟踪资源使用情况
+    -   性能分析
+
+3.  **测试**
+    -   测试不同的传输方式
+    -   验证错误处理
+    -   检查边界情况
+    -   对服务器进行负载测试

@@ -1,0 +1,58 @@
+---
+title: 发展路线图
+description: 我们对模型上下文协议（Model Context Protocol）未来发展的规划
+---
+
+<Callout type="info">
+最后更新时间：**2025-03-27**
+</Callout>
+
+模型上下文协议（Model Context Protocol）正在快速发展。本页概述了我们当前对未来大约 **六个月** 内关键优先事项和发展方向的思考，但随着项目的进展，这些计划可能会发生重大变化。要了解近期的变更，请查阅 **[规范变更日志](/specification/2025-03-26/changelog/)**。
+
+<Callout type="info">
+此处提出的想法并非承诺——我们可能会采用与描述不同的方式来解决这些挑战，或者某些想法可能根本不会实现。这也不是一个 _详尽_ 的列表；我们可能会纳入此处未提及的工作。
+</Callout>
+
+我们重视社区的参与！每个部分都链接到相关的讨论，您可以在那里了解更多信息并贡献您的想法。
+
+有关我们标准化流程的技术视角，请访问 GitHub 上的 [标准跟踪](https://github.com/orgs/modelcontextprotocol/projects/2/views/2)，该页面跟踪提案如何逐步纳入官方 [MCP 规范](https://spec.modelcontextprotocol.io)。
+
+## 验证
+
+为了培育一个健壮的开发者生态系统，我们计划投入资源于：
+
+- **参考客户端实现**：通过高质量的 AI 应用展示协议特性
+- **合规性测试套件**：自动化验证客户端、服务器和 SDK 是否正确实现了规范
+
+这些工具将帮助开发者自信地实施 MCP，同时确保整个生态系统行为的一致性。
+
+## 注册中心
+
+为了让 MCP 发挥其全部潜力，我们需要简化分发和发现 MCP 服务器的方式。
+
+我们计划开发一个 [**MCP 注册中心**](https://github.com/orgs/modelcontextprotocol/discussions/159)，以实现集中的服务器发现和元数据管理。该注册中心将主要作为一个 API 层，供第三方市场和发现服务在此基础上构建。
+
+## 智能体
+
+随着 MCP 日益成为智能体工作流的一部分，我们正在探索 [改进方案](https://github.com/modelcontextprotocol/specification/discussions/111)，例如：
+
+- **[智能体图谱](https://github.com/modelcontextprotocol/specification/discussions/94)**：通过命名空间和图感知的通信模式，实现复杂的智能体拓扑结构
+- **交互式工作流**：通过细粒度的权限控制、标准化的交互模式以及 [直接与最终用户沟通的方式](https://github.com/modelcontextprotocol/specification/issues/97)，改善人机协同体验
+
+## 多模态
+
+在 MCP 中支持 AI 能力的全方位谱系，包括：
+
+- **额外的模态**：视频和其他媒体类型
+- **[流式传输](https://github.com/modelcontextprotocol/specification/issues/117)**：多部分、分块消息以及用于交互式体验的双向通信
+
+## 治理
+
+我们正在实施优先考虑以下方面的治理结构：
+
+- **社区主导的开发**：培育一个协作的生态系统，让社区成员和 AI 开发者都能参与 MCP 的演进，确保其服务于多样化的应用和用例
+- **透明的标准化**：建立清晰的规范贡献流程，同时探索通过行业机构进行正式标准化
+
+## 参与进来
+
+我们欢迎您为 MCP 的未来做出贡献！加入我们的 [GitHub Discussions](https://github.com/orgs/modelcontextprotocol/discussions)，分享想法、提供反馈或参与开发过程。

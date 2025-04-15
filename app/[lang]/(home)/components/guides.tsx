@@ -6,28 +6,20 @@ import quickStartImage from '/public/images/quick-start.png';
 
 const data = [
   {
-    title: 'Create, develop, and deploy a Next.js app using Sealos DevBox',
-    url: '/docs/quick-start',
+    title: '开发一个 MCP Server',
+    url: '/docs/core/quickstart/server',
   },
   {
-    title: 'Build an AI-powered Discord bot using Sealos DevBox',
-    url: '/docs/examples/build-your-own-discord-bot',
+    title: '开发一个 MCP 客户端',
+    url: '/docs/core/quickstart/client',
   },
   {
-    title: 'Connect to PostgreSQL databases in Sealos DevBox using Node.js',
-    url: '/docs/guides/databases/postgresql/nodejs',
+    title: '使用 LLM 构建 MCP 应用',
+    url: '/docs/core/tutorials/building-mcp-with-llms',
   },
   {
-    title: 'Connect to PostgreSQL databases in Sealos DevBox using Python',
-    url: '/docs/guides/databases/postgresql/python',
-  },
-  {
-    title: 'Connect to PostgreSQL databases in Sealos DevBox using Go',
-    url: '/docs/guides/databases/postgresql/go',
-  },
-  {
-    title: 'Connect to PostgreSQL databases in Sealos DevBox using Java',
-    url: '/docs/guides/databases/postgresql/java',
+    title: '用 MCP Inspector 测试和调试 MCP Server',
+    url: '/docs/core/tools/inspector',
   },
 ];
 
@@ -96,7 +88,7 @@ export default function Example() {
     <div className="mt-[140px]">
       <AnimateElement type="slideUp">
         <div className="text-center text-base font-bold text-black sm:text-4xl">
-          Quick Start Guides
+          快速开始
         </div>
         <div className="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2">
           {data.map((item, index) => (
@@ -120,11 +112,11 @@ export default function Example() {
           <AnimateElement type="slideUp">
             <div className="flex size-full flex-col justify-center gap-16 px-4 py-16 sm:px-[72px] md:pr-0">
               <div className="text-base font-bold leading-normal  text-black sm:text-[28px]">
-                Start a New Development Environment in Seconds
+                开发你的第一个 MCP 应用
               </div>
               <a href={appDomain} target="_blank">
                 <div className="flex w-fit cursor-pointer items-center justify-center gap-[6px] rounded-md bg-[#FAFCFF] py-2 pl-5 pr-4 font-medium text-custom-primary-text shadow-button hover:bg-[#F1F5FB]">
-                  New Project
+                  盘他
                   <ArrowRight className="relative h-4 w-4" />
                 </div>
               </a>

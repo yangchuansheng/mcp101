@@ -42,7 +42,7 @@ export default function BlogHeader({
       <div className="py-12 pt-28">
         <div className="mb-6 text-center">
           <span className="inline-block rounded-lg bg-primary/10 px-4 py-1.5 text-lg font-medium text-primary">
-            Sealos Blog
+            MCP Blog
           </span>
         </div>
         <h1 className="mb-8 text-center text-4xl font-bold md:text-5xl">

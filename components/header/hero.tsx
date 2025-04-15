@@ -1,6 +1,7 @@
 import { GetStartedButton } from '@/components/ui/shiny-button';
 import { ReactNode } from 'react';
 import { languagesType, i18n } from '@/lib/i18n';
+import { ImagePopup } from '@/components/ui/image-popup';
 
 // Translation object for button text
 const buttonTranslations: Record<languagesType, string> = {
@@ -32,10 +33,10 @@ export default function Hero({
     title.main,
     mainTitleEmphasis,
   );
-  
+
   // Use provided buttonTitle or get from translations based on language
   const buttonText = buttonTitle || buttonTranslations[lang];
-  
+
   return (
     <section className="pt-12 sm:pt-16">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
@@ -81,9 +82,33 @@ export default function Hero({
             </a> */}
           </div>
 
-          <p className="font-inter mt-8 text-sm text-gray-500">
-            <a href="" target="_blank" className="underline">加入 MCP 技术交流群：迈出 MCP 应用开发的第一步</a>
-          </p>
+          <div className="font-inter mt-8 text-sm text-gray-500">
+          <ImagePopup
+              imageSrc="/images/mcp-group-qrcode.jpg"
+              imageAlt="MCP 开技术交流群二维码"
+              title="加入 MCP 技术交流群： 迈出 MCP 开发第一步"
+              description={
+                <>
+                  <p className="mb-4">扫描二维码加入我们的社群，开启你的 MCP 开发之旅！</p>
+                  <div className="mb-2 flex items-center">
+                    <div className="mr-4 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xl font-bold">1</div>
+                    <div>
+                      <p className="font-bold">入群时请介绍： 1） 你的编程经验； 2） 想要开发的 MCP 应用。</p>
+                    </div>
+                  </div>
+                  <div className="mb-2 flex items-center">
+                    <div className="mr-4 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 text-xl font-bold">2</div>
+                    <div>
+                      <p className="font-bold">我们会在社群里面实战用 MCP 来操作各种云资源。</p>
+                    </div>
+                  </div>
+                </>
+              }
+              qrCodeCaption="群聊：MCP 技术交流群"
+            >
+              <span className="underline cursor-pointer">加入 MCP 技术交流群：迈出 MCP 应用开发的第一步</span>
+            </ImagePopup>
+          </div>
         </div>
       </div>
 

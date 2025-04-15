@@ -9,7 +9,6 @@ import Video from '@/components/video';
 import { HovermeButton } from '@/components/button/hoverme';
 import { generatePageMetadata } from '@/lib/utils/metadata';
 import { appDomain } from '@/config/site';
-import RedirectSuggest from '@/components/redirectSuggest';
 import { languagesType } from '@/lib/i18n';
 import placeholderImage from '/public/images/video.webp';
 
@@ -29,7 +28,7 @@ export default function HomePage({
     <div className="h-full bg-[#EBF2FF]">
       <Header lang={params.lang} />
       <main className="custom-container px-8 pt-14 md:px-[15%]">
-        <Hero title={title} mainTitleEmphasis={2} getStartedLink={appDomain} lang={params.lang}>
+        <Hero title={title} mainTitleEmphasis={2} getStartedLink='/docs/core/introduction' lang={params.lang}>
         </Hero>
 
         <div className="mb-[64px]  mt-[64px] h-[1px] bg-[#DDE7F7]"></div>
@@ -40,7 +39,6 @@ export default function HomePage({
       <div className="mt-[140px] h-[1px] bg-[#DDE7F7]"></div>
       <Footer lang={params.lang} />
       <TailwindIndicator />
-      <RedirectSuggest />
     </div>
   );
 }

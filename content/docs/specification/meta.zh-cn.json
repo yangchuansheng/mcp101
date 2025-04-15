@@ -1,0 +1,7 @@
+{
+    "title": "MCP 规范",
+    "description": "了解 MCP 的规范",
+    "icon": "Cpu",
+    "pages": ["[Cloudy][Sealos Cloud](https://cloud.sealos.run)", "[SquareCode][Sealos DevBox](https://sealos.run/devbox)", "[Brain][FastGPT](https://fastgpt.cn)", "---SDK---", "[SquareCode][Python SDK](https://github.com/modelcontextprotocol/python-sdk)", "[SquareCode][Typescript SDK](https://github.com/modelcontextprotocol/typescript-sdk)", "[SquareCode][Java SDK](https://github.com/modelcontextprotocol/java-sdk)", "[SquareCode][Kotlin SDK](https://github.com/modelcontextprotocol/kotlin-sdk)", "[SquareCode][C# SDK](https://github.com/modelcontextprotocol/csharp-sdk)", "---2025-03-26 (Latest)---", "...2025-03-26"],
+    "root": true
+}

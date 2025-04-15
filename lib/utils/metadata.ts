@@ -19,15 +19,15 @@ export async function generateBlogMetadata(props: {
   if (!page && !isRootPage) notFound();
 
   let url = `${siteConfig.url.base}/blog`;
-  let docTitle = 'Sealos Blog';
+  let docTitle = 'MCP Blog';
   let imageUrl = blogImageApi + docTitle;
-  let description = 'Sealos Blog';
-  let keywords = ['Sealos', 'Blog'];
+  let description = 'MCP Blog';
+  let keywords = ['MCP', 'Blog'];
 
   if (page) {
     url = `${siteConfig.url.base}/blog/${page.slugs.join('/')}`;
     imageUrl = blogImageApi + page.data.title;
-    docTitle = `${page.data.title} | Sealos Blog`;
+    docTitle = `${page.data.title} | MCP Blog`;
     description = page.data.description;
   }
 

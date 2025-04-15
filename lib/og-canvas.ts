@@ -74,14 +74,14 @@ export async function drawCanvas(
 // Get configuration based on content type
 function getContentConfig(type: string) {
   // Default tag and icon if type is not recognized
-  let tagText = 'Sealos';
+  let tagText = 'MCP';
   let iconPath = join(process.cwd(), 'public', 'sealos.svg');
   let showTag = true;
   let showTitle = true;
 
   // Content specific configurations
   if (type === 'blog') {
-    tagText = 'Sealos Blog';
+    tagText = 'MCP Blog';
     iconPath = join(
       process.cwd(),
       'public',
@@ -91,7 +91,7 @@ function getContentConfig(type: string) {
       'blog.svg',
     );
   } else if (type === 'docs') {
-    tagText = 'Sealos Docs';
+    tagText = 'MCP Docs';
     iconPath = join(
       process.cwd(),
       'public',
@@ -101,7 +101,7 @@ function getContentConfig(type: string) {
       'docs.svg',
     );
   } else if (type === 'email') {
-    tagText = 'Sealos Email';
+    tagText = 'MCP Email';
     iconPath = join(
       process.cwd(),
       'public',

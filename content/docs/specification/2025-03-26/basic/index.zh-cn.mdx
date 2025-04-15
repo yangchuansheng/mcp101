@@ -1,0 +1,103 @@
+---
+title: 基础协议
+---
+
+<Callout type="info">
+**协议修订版本**: 2025-03-26
+</Callout>
+
+模型上下文协议（Model Context Protocol）由几个协同工作的关键组件构成：
+
+- **基础协议**：核心 JSON-RPC 消息类型
+- **生命周期管理**：连接初始化、能力协商和会话控制
+- **服务器功能**：服务器公开的资源、提示和工具
+- **客户端功能**：客户端提供的采样和根目录列表
+- **实用工具**：日志记录和参数补全等跨领域功能
+
+所有实现**必须**支持基础协议和生命周期管理组件。其他组件**可以**根据应用程序的具体需求选择性实现。
+
+这些协议层在实现客户端和服务器之间丰富交互的同时，建立了清晰的关注点分离。模块化设计允许实现仅支持其所需的功能。
+
+## 消息
+
+MCP 客户端和服务器之间的所有消息**必须**遵循 [JSON-RPC 2.0](https://www.jsonrpc.org/specification) 规范。该协议定义了以下类型的消息：
+
+### 请求
+
+请求由客户端发送给服务器，或由服务器发送给客户端，用于发起一个操作。
+
+```typescript
+{
+  jsonrpc: "2.0";
+  id: string | number;
+  method: string;
+  params?: {
+    [key: string]: unknown;
+  };
+}
+```
+
+- 请求**必须**包含一个字符串或数字类型的 ID。
+- 与基础 JSON-RPC 不同，ID **不得**为 `null`。
+- 请求 ID **不得**是请求方在同一会话中先前使用过的 ID。
+
+### 响应
+
+响应是针对请求发送的回复，包含操作的结果或错误信息。
+
+```typescript
+{
+  jsonrpc: "2.0";
+  id: string | number;
+  result?: {
+    [key: string]: unknown;
+  }
+  error?: {
+    code: number;
+    message: string;
+    data?: unknown;
+  }
+}
+```
+
+- 响应**必须**包含与其对应的请求相同的 ID。
+- **响应**进一步细分为**成功结果**或**错误**。必须设置 `result` 或 `error` 中的一个。响应**不得**同时设置两者。
+- 结果**可以**遵循任何 JSON 对象结构，而错误**必须**至少包含错误代码和消息。
+- 错误代码**必须**是整数。
+
+### 通知
+
+通知由客户端发送给服务器，或由服务器发送给客户端，作为单向消息。接收方**不得**发送响应。
+
+```typescript
+{
+  jsonrpc: "2.0";
+  method: string;
+  params?: {
+    [key: string]: unknown;
+  };
+}
+```
+
+- 通知**不得**包含 ID。
+
+### 批处理
+
+JSON-RPC 还定义了一种[批量处理多个请求和通知](https://www.jsonrpc.org/specification#batch)的方法，即通过数组发送它们。MCP 实现**可以**支持发送 JSON-RPC 批处理，但**必须**支持接收 JSON-RPC 批处理。
+
+## 认证
+
+MCP 提供了一个用于 HTTP 的[认证](/specification/2025-03-26/basic/authorization)框架。
+使用基于 HTTP 传输的实现**应当**遵循此规范，而使用 STDIO 传输的实现**不应**遵循此规范，而应从环境中检索凭据。
+
+此外，客户端和服务器**可以**协商它们自己的自定义认证和授权策略。
+
+如需进一步讨论和为 MCP 认证机制的演进做出贡献，请加入我们的 [GitHub Discussions](https://github.com/modelcontextprotocol/specification/discussions)，帮助塑造协议的未来！
+
+## 模式定义
+
+协议的完整规范定义为一个 [TypeScript 模式](https://github.com/modelcontextprotocol/specification/blob/main/schema/2025-03-26/schema.ts)。
+这是所有协议消息和结构的真实来源。
+
+还有一个 [JSON Schema](https://github.com/modelcontextprotocol/specification/blob/main/schema/2025-03-26/schema.json)，
+它是从 TypeScript 真实来源自动生成的，可用于各种自动化工具。

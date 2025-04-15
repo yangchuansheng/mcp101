@@ -1,0 +1,141 @@
+---
+title: "提示词 (Prompts)"
+description: "创建可复用的提示词模板和工作流"
+---
+
+提示词 (Prompts) 使服务器能够定义可复用的提示词模板和工作流，客户端可以轻松地将其呈现给用户和大型语言模型 (LLM)。它们提供了一种强大的方式来标准化和共享常见的 LLM 交互。
+
+<Callout type="info">
+提示词被设计为**由用户控制**，这意味着它们从服务器暴露给客户端，目的是让用户能够明确选择使用它们。
+</Callout>
+
+## 概述
+
+MCP 中的提示词是预定义的模板，可以：
+- 接受动态参数
+- 包含来自资源的上下文信息
+- 链接多个交互
+- 指导特定的工作流
+- 作为用户界面元素（如斜杠命令）呈现
+
+## 提示词结构
+
+每个提示词都通过以下结构定义：
+
+```typescript
+{
+  name: string;              // 提示词的唯一标识符
+  description?: string;      // 人类可读的描述
+  arguments?: [              // 可选的参数列表
+    {
+      name: string;          // 参数标识符
+      description?: string;  // 参数描述
+      required?: boolean;    // 参数是否必需
+    }
+  ]
+}
+```
+
+## 发现提示词
+
+客户端可以通过 `prompts/list` 端点发现可用的提示词：
+
+```typescript
+// 请求
+{
+  method: "prompts/list"
+}
+
+// 响应
+{
+  prompts: [
+    {
+      name: "analyze-code",
+      description: "分析代码以寻找潜在改进",
+      arguments: [
+        {
+          name: "language",
+          description: "编程语言",
+          required: true
+        }
+      ]
+    }
+  ]
+}
+```
+
+## 使用提示词
+
+要使用提示词，客户端需要发送一个 `prompts/get` 请求：
+
+```typescript
+// 请求
+{
+  method: "prompts/get",
+  params: {
+    name: "analyze-code",
+    arguments: {
+      language: "python"
+    }
+  }
+}
+
+// 响应
+{
+  description: "分析 Python 代码以寻找潜在改进",
+  messages: [
+    {
+      role: "user",
+      content: {
+        type: "text",
+        text: "请分析以下 Python 代码以寻找潜在改进：\n\n```python\ndef calculate_sum(numbers):\n    total = 0\n    for num in numbers:\n        total = total + num\n    return total\n\nresult = calculate_sum([1, 2, 3, 4, 5])\nprint(result)\n```"
+      }
+    }
+  ]
+}
+```
+
+## 动态提示词
+
+提示词可以是动态的，并包含：
+
+### 嵌入的资源上下文
+
+```json
+{
+  "name": "analyze-project",
+  "description": "分析项目日志和代码",
+  "arguments": [
+    {
+      "name": "timeframe",
+      "description": "分析日志的时间范围",
+      "required": true
+    },
+    {
+      "name": "fileUri",
+      "description": "要审查的代码文件的 URI",
+      "required": true
+    }
+  ]
+}
+```
+
+处理 `prompts/get` 请求时：
+
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": {
+        "type": "text",
+        "text": "分析这些系统日志和代码文件是否存在任何问题："
+      }
+    },
+    {
+      "role": "user",
+      "content": {
+        "type": "resource",
+        "resource": {
+          "uri": "logs://recent?timeframe=1h",
+          "text": "[2024-03-14 15:32:11] ERROR: Connection timeout in network.py:127\n[2024-03-14 15:32:15] WARN: Retrying connection (attempt 2/3)\n[2024-03-

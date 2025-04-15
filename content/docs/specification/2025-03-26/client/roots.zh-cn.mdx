@@ -1,0 +1,179 @@
+---
+title: 根目录
+---
+
+<Callout type="info">
+**协议修订版本**: 2025-03-26
+</Callout>
+
+模型上下文协议 (Model Context Protocol, MCP) 提供了一种标准化的方式，允许客户端向服务器公开文件系统的“根目录”。根目录定义了服务器可以在文件系统中操作的边界，使其能够了解有权访问哪些目录和文件。服务器可以向支持此功能的客户端请求根目录列表，并在该列表发生变化时接收通知。
+
+## 用户交互模型
+
+MCP 中的根目录通常通过工作区或项目配置界面进行管理。
+
+例如，实现可以提供一个工作区/项目选择器，允许用户选择服务器应有权访问的目录和文件。这可以与版本控制系统或项目文件的自动工作区检测相结合。
+
+然而，实现可以自由地通过任何适合其需求的界面模式来管理根目录——协议本身并不强制要求任何特定的用户交互模型。
+
+## 能力声明 (Capabilities)
+
+支持根目录的客户端 **必须** 在[初始化](/specification/2025-03-26/basic/lifecycle#initialization)期间声明 `roots` 能力：
+
+```json
+{
+  "capabilities": {
+    "roots": {
+      "listChanged": true
+    }
+  }
+}
+```
+
+`listChanged` 表明客户端是否会在根目录列表发生变化时发送通知。
+
+## 协议消息
+
+### 列出根目录
+
+要检索根目录，服务器发送一个 `roots/list` 请求：
+
+**请求:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "roots/list"
+}
+```
+
+**响应:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "roots": [
+      {
+        "uri": "file:///home/user/projects/myproject",
+        "name": "我的项目"
+      }
+    ]
+  }
+}
+```
+
+### 根目录列表变更
+
+当根目录发生变化时，支持 `listChanged` 的客户端 **必须** 发送一个通知：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/roots/list_changed"
+}
+```
+
+## 消息流程
+
+<Mermaid chart={`
+sequenceDiagram
+    participant 服务器 (Server)
+    participant 客户端 (Client)
+
+    Note over 服务器,客户端: 发现阶段 (Discovery)
+    服务器->>客户端: roots/list (请求根目录列表)
+    客户端-->>服务器: 可用的根目录 (Available roots)
+
+    Note over 服务器,客户端: 变更阶段 (Changes)
+    客户端--)服务器: notifications/roots/list_changed (根目录列表变更通知)
+    服务器->>客户端: roots/list (再次请求根目录列表)
+    客户端-->>服务器: 更新后的根目录 (Updated roots)
+`} />
+
+## 数据类型
+
+### 根目录 (Root)
+
+一个根目录定义包括：
+
+- `uri`: 根目录的唯一标识符。在当前规范中，这 **必须** 是一个 `file://` URI。
+- `name`: 可选的、供显示使用的人类可读名称。
+
+不同用例的根目录示例：
+
+#### 项目目录
+
+```json
+{
+  "uri": "file:///home/user/projects/myproject",
+  "name": "我的项目"
+}
+```
+
+#### 多个代码仓库
+
+```json
+[
+  {
+    "uri": "file:///home/user/repos/frontend",
+    "name": "前端仓库"
+  },
+  {
+    "uri": "file:///home/user/repos/backend",
+    "name": "后端仓库"
+  }
+]
+```
+
+## 错误处理
+
+客户端 **应当** 对常见的失败情况返回标准的 JSON-RPC 错误：
+
+- 客户端不支持根目录：`-32601` (方法未找到 / Method not found)
+- 内部错误：`-32603` (Internal error)
+
+错误示例：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    "code": -32601,
+    "message": "不支持根目录 (Roots not supported)",
+    "data": {
+      "reason": "客户端不具备 roots 能力 (Client does not have roots capability)"
+    }
+  }
+}
+```
+
+## 安全注意事项
+
+1.  客户端 **必须**:
+    -   仅公开具有适当权限的根目录。
+    -   验证所有根目录 URI 以防止路径遍历攻击。
+    -   实施恰当的访问控制。
+    -   监控根目录的可访问性。
+
+2.  服务器 **应当**:
+    -   处理根目录变为不可用的情况。
+    -   在操作过程中尊重根目录的边界。
+    -   根据提供的根目录验证所有路径。
+
+## 实现指南
+
+1.  客户端 **应当**:
+    -   在向服务器公开根目录之前，提示用户获取同意。
+    -   提供清晰的用户界面用于管理根目录。
+    -   在公开前验证根目录的可访问性。
+    -   监控根目录的变化。
+
+2.  服务器 **应当**:
+    -   在使用前检查客户端是否具备 `roots` 能力。
+    -   优雅地处理根目录列表的变化。
+    -   在操作中尊重根目录的边界。
+    -   适当地缓存根目录信息。

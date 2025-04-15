@@ -11,23 +11,18 @@ import { languagesType } from '@/lib/i18n';
  * Docs Layout: app/docs/layout.tsx
  */
 export const baseOptions: BaseLayoutProps = {
-  i18n: true,
+  i18n: false,
   disableThemeSwitch: true,
   nav: {
     title: (
       <div className="flex items-center gap-1">
-        <img alt="Sealos Logo" src="/logo.svg" />
-        <span className="hidden text-base font-bold md:block">Sealos</span>
+        <img alt="MCP Logo" src="/logo.svg" />
+        <span className="hidden text-base font-bold md:block">MCP 101</span>
       </div>
     ),
   },
-  githubUrl: 'https://github.com/labring/sealos',
+  githubUrl: 'https://github.com/yangchuansheng/mcp101',
   links: [
-    {
-      text: 'Documentation',
-      url: '/docs',
-      active: 'nested-url',
-    },
   ],
 };
 
@@ -40,16 +35,6 @@ type HeaderLinkType = {
 
 // Define the basic navigation link data (without translation text and localized URLs)
 export const HeaderLinksData: HeaderLinkType[] = [
-  {
-    textKey: 'devbox',
-    urlKey: 'devboxUrl',
-    isExternal: false,
-  },
-  {
-    textKey: 'appStore',
-    urlKey: 'appStoreUrl',
-    isExternal: true,
-  },
   {
     textKey: 'docs',
     urlKey: 'docsUrl',
@@ -64,11 +49,6 @@ export const HeaderLinksData: HeaderLinkType[] = [
     textKey: 'blog',
     urlKey: 'blogUrl',
     isExternal: false,
-  },
-  {
-    textKey: 'contact',
-    urlKey: 'contactUrl',
-    isExternal: true,
   },
 ];
 
@@ -86,7 +66,7 @@ export const navTranslations: Record<languagesType, Record<string, string>> = {
     // URLs
     devboxUrl: '/devbox',
     appStoreUrl: templateDomain,
-    docsUrl: '/docs',
+    docsUrl: '/docs/core',
     blogUrl: '/blog',
     contactUrl: 'mailto:contact@sealos.io',
   },
@@ -97,12 +77,12 @@ export const navTranslations: Record<languagesType, Record<string, string>> = {
     docs: '文档',
     blog: '博客',
     contact: '联系我们',
-    getStarted: '免费体验 7 天',
+    getStarted: '开始学习',
 
     // URLs
     devboxUrl: '/devbox',
     appStoreUrl: templateDomain,
-    docsUrl: '/docs',
+    docsUrl: '/docs/core',
     blogUrl: '/blog',
     contactUrl:
       'https://fael3z0zfze.feishu.cn/share/base/form/shrcn5oHHTKCf3VREMKOhEy6fmf',

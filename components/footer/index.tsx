@@ -53,20 +53,15 @@ const FooterLinksData: Record<string, FooterCategoryType> = {
     titleKey: 'resourcesTitle',
     links: [
       { textKey: 'docs', urlKey: 'docsUrl', isExternal: false },
-      { textKey: 'appStore', urlKey: 'appStoreUrl', isExternal: true }
+      { textKey: 'appStore', urlKey: 'appStoreUrl', isExternal: false }
     ]
   },
   products: {
     titleKey: 'productsTitle',
     links: [
-      { textKey: 'devbox', urlKey: 'devboxUrl', isExternal: false },
+      { textKey: 'sealos', urlKey: 'sealosUrl', isExternal: true },
+      { textKey: 'devbox', urlKey: 'devboxUrl', isExternal: true },
       { textKey: 'fastgpt', urlKey: 'fastgptUrl', isExternal: true }
-    ]
-  },
-  support: {
-    titleKey: 'supportTitle',
-    links: [
-      { textKey: 'contactUs', urlKey: 'contactUsUrl', isExternal: true }
     ]
   },
   legal: {
@@ -84,61 +79,51 @@ export const footerTranslations: Record<languagesType, Record<string, string>> =
     // Category titles
     resourcesTitle: 'Resources',
     productsTitle: 'Products',
-    supportTitle: 'Support',
     
     // Link texts
     docs: 'Docs',
-    appStore: 'App Store',
+    appStore: 'Blog',
+    sealos: 'Sealos',
     devbox: 'DevBox',
     fastgpt: 'FastGPT',
     contactUs: 'Contact Us',
-    termsOfService: 'Terms of Service',
-    privacyPolicy: 'Privacy Policy',
-    cookiePolicy: 'Cookie Policy',
-    copyright: 'Copyright © 2024 Sealos. All rights reserved.',
+    copyright: 'Copyright © 2024 MCP101. All rights reserved.',
     
     // URLs
-    docsUrl: '/docs/quick-start',
-    appStoreUrl: templateDomain,
-    devboxUrl: '/devbox',
+    docsUrl: '/docs/core/introduction',
+    appStoreUrl: '/blog',
+    sealosUrl: 'https://sealos.io',
+    devboxUrl: 'https://sealos.io/devbox',
     fastgptUrl: 'https://tryfastgpt.ai',
     contactUsUrl: 'mailto:contact@sealos.io',
-    termsOfServiceUrl: '/docs/msa/terms-of-service',
-    privacyPolicyUrl: '/docs/msa/privacy-policy',
-    cookiePolicyUrl: '/legal/cookie-policy',
   },
   'zh-cn': {
     // Category titles
     resourcesTitle: '资源',
     productsTitle: '产品',
-    supportTitle: '支持',
     
     // Link texts
     docs: '文档',
-    appStore: '应用商店',
+    appStore: '博客',
+    sealos: 'Sealos',
     devbox: 'DevBox',
     fastgpt: 'FastGPT',
     aiproxy: 'AI Proxy',
     case: '案例',
     forum: '社区',
     contactUs: '联系我们',
-    termsOfService: '服务条款',
-    privacyPolicy: '隐私政策',
-    cookiePolicy: 'Cookie 政策',
-    copyright: 'Copyright © 2024 Sealos. 粤ICP备2023048773号 珠海环界云计算有限公司版权所有',
+    copyright: 'Copyright © 2024 MCP101. All rights reserved.',
     
     // URLs - keeping the same URLs as English but can be customized if needed
-    docsUrl: '/docs/quick-start',
-    appStoreUrl: templateDomain,
-    devboxUrl: '/devbox',
+    docsUrl: '/docs/core/introduction',
+    appStoreUrl: '/blog',
+    sealosUrl: 'https://sealos.run',
+    devboxUrl: 'https://sealos.run/devbox',
     fastgptUrl: 'https://fastgpt.cn',
-    aiproxyUrl: '/aiproxy',
+    aiproxyUrl: 'https://sealos.run/aiproxy',
     contactUsUrl: 'https://fael3z0zfze.feishu.cn/share/base/form/shrcn5oHHTKCf3VREMKOhEy6fmf',
     caseUrl: '/case',
     forumUrl: 'https://forum.sealos.run',
-    termsOfServiceUrl: '/docs/msa/terms-of-service',
-    privacyPolicyUrl: '/docs/msa/privacy-policy',
-    cookiePolicyUrl: '/legal/cookie-policy',
   },
 };
 
@@ -149,10 +134,6 @@ const getFooterLinks = (lang: languagesType) => {
   const productLinks = [...FooterLinksData.products.links];
   if (lang === 'zh-cn') {
     productLinks.push({ textKey: 'aiproxy', urlKey: 'aiproxyUrl', isExternal: false });
-  }
-  const supportLinks = [...FooterLinksData.support.links];
-  if (lang === 'zh-cn') {
-    supportLinks.push({ textKey: 'case', urlKey: 'caseUrl', isExternal: false },{ textKey: 'forum', urlKey: 'forumUrl', isExternal: true });
   }
   
   return {
@@ -167,14 +148,6 @@ const getFooterLinks = (lang: languagesType) => {
     products: {
       title: FooterLinksData.products.titleKey ? translations[FooterLinksData.products.titleKey] : '',
       links: productLinks.map(link => ({
-        text: translations[link.textKey],
-        url: translations[link.urlKey],
-        isExternal: link.isExternal
-      }))
-    },
-    support: {
-      title: FooterLinksData.support.titleKey ? translations[FooterLinksData.support.titleKey] : '',
-      links: supportLinks.map(link => ({
         text: translations[link.textKey],
         url: translations[link.urlKey],
         isExternal: link.isExternal
@@ -245,16 +218,6 @@ const Footer = async ({ lang = i18n.defaultLanguage as languagesType }: FooterPr
               </FooterLink>
             ))}
           </FooterLinkColumn>
-          <FooterLinkColumn>
-            <div className="text-base font-semibold uppercase text-black hover:text-black hover:no-underline">
-              {footerLinks.support.title}
-            </div>
-            {footerLinks.support.links.map((link, index) => (
-              <FooterLink key={index} href={link.url}>
-                {link.text}
-              </FooterLink>
-            ))}
-          </FooterLinkColumn>
         </div>
       </div>
 
@@ -270,69 +233,7 @@ const Footer = async ({ lang = i18n.defaultLanguage as languagesType }: FooterPr
               {link.text}
             </FooterLink>
           ))}
-          <div>|</div>
           <div>{footerLinks.copyright}</div>
-        </div>
-        <div className="flex space-x-4">
-          <Link
-            className="flex size-8 items-center justify-center rounded-full bg-[#FAFCFF] object-center hover:bg-[#1118240D]"
-            href={siteConfig.links.github}
-            aria-label="GitHub"
-          >
-            <GithubIcon />
-          </Link>
-
-          <Link
-            className="flex size-8 items-center justify-center rounded-full bg-[#FAFCFF] object-center hover:bg-[#1118240D]"
-            href={siteConfig.links.discord}
-            aria-label="Discord"
-          >
-            <DiscordIcon />
-          </Link>
-          <Link
-            className="flex size-8 items-center justify-center rounded-full bg-[#FAFCFF] object-center hover:bg-[#1118240D]"
-            href={siteConfig.links.twitter}
-            aria-label="Twitter"
-          >
-            <img
-              src="/icons/twitter.svg"
-              alt="Twitter"
-              width={16}
-              height={16}
-              className="h-4 w-4"
-            />
-          </Link>
-          <Link
-            className="flex size-8 items-center justify-center rounded-full bg-[#FAFCFF] object-center hover:bg-[#1118240D]"
-            href={siteConfig.links.youtube}
-            aria-label="YouTube"
-          >
-            <img
-              src="/icons/youtube.svg"
-              alt="YouTube"
-              width={16}
-              height={16}
-              className="h-4 w-4"
-            />
-          </Link>
-          {lang === 'zh-cn' && (
-            <Link
-              className="flex size-8 items-center justify-center rounded-full bg-[#FAFCFF] object-center hover:bg-[#1118240D]"
-              href={siteConfig.links.bilibili}
-              aria-label="Bilibili"
-            >
-              <BilibiliIcon />
-            </Link>
-          )}
-          {lang === 'zh-cn' && (
-            <Link
-            className="flex size-8 items-center justify-center rounded-full bg-[#FAFCFF] object-center hover:bg-[#1118240D]"
-            href={siteConfig.links.wechat}
-            aria-label="WeChat"
-          >
-            <WechatIcon />
-          </Link>
-          )}
         </div>
       </div>
     </div>

@@ -39,7 +39,7 @@ const analyticsConfigByLanguage: Record<string, AnalyticsConfig> = {
       enabled: true,
     },
     email: {
-      enabled: true,
+      enabled: false,
     },
   },
   'zh-cn': {
@@ -56,7 +56,7 @@ const analyticsConfigByLanguage: Record<string, AnalyticsConfig> = {
       enabled: true,
     },
     email: {
-      enabled: true,
+      enabled: false,
     },
   },
 };

@@ -1,0 +1,5 @@
+{
+    "icon": "Library",
+    "pages": ["[Cloudy][Sealos Cloud](https://cloud.sealos.run)", "[SquareCode][Sealos DevBox](https://sealos.run/devbox)", "[Brain][FastGPT](https://fastgpt.cn)", "---SDK---", "[SquareCode][Python SDK](https://github.com/modelcontextprotocol/python-sdk)", "[SquareCode][Typescript SDK](https://github.com/modelcontextprotocol/typescript-sdk)", "[SquareCode][Java SDK](https://github.com/modelcontextprotocol/java-sdk)", "[SquareCode][Kotlin SDK](https://github.com/modelcontextprotocol/kotlin-sdk)", "[SquareCode][C# SDK](https://github.com/modelcontextprotocol/csharp-sdk)", "---入门---", "introduction", "quickstart", "examples", "clients", "---教程---", "...tutorials", "...tools", "---核心概念---", "...concepts", "---开发指南---", "...development"],
+    "root": true
+}
